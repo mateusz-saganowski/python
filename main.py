@@ -10,3 +10,5 @@ while True:
         print(nowe_zadanie)
     if odpowiedz == "0":
         break
+    if odpowiedz == "1":
+        print("nic nie wykonałeś jeszcze łajzo!")
