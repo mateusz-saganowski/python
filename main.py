@@ -1,6 +1,7 @@
 from zadania import zadania
 
 lista = []
+wyjscie = False
 
 
 def menu_glowne():
@@ -16,7 +17,8 @@ def menu_glowne():
     elif odpowiedz == "3":
         dodanie_zadania()
     elif odpowiedz == "0":
-        exit()
+        global wyjscie
+        wyjscie = True
     else:
         print("Błędny wybór")
 
@@ -26,7 +28,8 @@ def powrot_do_menu():
     if odpowiedz == "N" or odpowiedz == "n":
         menu_glowne()
     elif odpowiedz == "T" or odpowiedz == "t":
-        exit()
+        global wyjscie
+        wyjscie = True
     else:
         print("Błędny wybór")
         powrot_do_menu()
@@ -35,8 +38,7 @@ def powrot_do_menu():
 def dodanie_zadania():
     print("Podaj nazwę nowego zadania: ")
     nowe = zadania(input(), False)
-    print(nowe.tytul, nowe.status)
-    lista.append(nowe.tytul)
+    lista.append(nowe)
     odpowiedz = input("Chcesz dodać kolejne zadanie [T/N]? ")
     if odpowiedz == "N" or odpowiedz == "n":
         menu_glowne()
@@ -54,10 +56,11 @@ def zrobione_zadania():
 
 def zadania_do_zrobienia():
     print("tu będą zadania do zrobienia pobrane z bazy danych")
-    print(lista)
+    for test in lista:
+        print(test.tytul)
     powrot_do_menu()
 
 
 if __name__ == "__main__":
-    while True:
+    while not wyjscie:
         menu_glowne()
