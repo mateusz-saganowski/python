@@ -125,6 +125,7 @@ def new_task():
     task_list.append(new)
     choice = input("Chcesz dodać kolejne zadanie [T/N]? ")
     if choice == "N" or choice == "n":
+        main()
         main_menu()
     elif choice == "T" or choice == "t":
         new_task()
@@ -146,6 +147,6 @@ def incomplete_task():
 
 
 if __name__ == "__main__":
-    main()
+#    main()
     while True:
         main_menu()
