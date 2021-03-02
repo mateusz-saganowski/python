@@ -1,66 +1,79 @@
-from zadania import zadania
+import sqlite3
+from sqlite3 import Error
+from task import task
 
-lista = []
-wyjscie = False
+task_list = []
 
 
-def menu_glowne():
+def create_connection(db_file):
+    """ create a database connection to a SQLite database """
+    conn = None
+    try:
+        conn = sqlite3.connect(db_file)
+        print(sqlite3.version)
+    except Error as e:
+        print(e)
+    finally:
+        if conn:
+            conn.close()
+
+
+def main_menu():
     print("1: Wyświetlenie listy zrobionych zadań")
     print("2: Wyświetlenie listy zadań do wykonania")
     print("3: Dodaj zadanie")
     print("0: Wyjście")
-    odpowiedz = input('Wybierz menu: ')
-    if odpowiedz == "1":
-        zrobione_zadania()
-    elif odpowiedz == "2":
-        zadania_do_zrobienia()
-    elif odpowiedz == "3":
-        dodanie_zadania()
-    elif odpowiedz == "0":
-        global wyjscie
-        wyjscie = True
+    choice = input('Wybierz menu: ')
+    if choice == "1":
+        complete_task()
+    elif choice == "2":
+        incomplete_task()
+    elif choice == "3":
+        new_task()
+    elif choice == "0":
+        exit()
     else:
         print("Błędny wybór")
 
 
-def powrot_do_menu():
-    odpowiedz = input('Wyjście z programu [T/N]? ')
-    if odpowiedz == "N" or odpowiedz == "n":
-        menu_glowne()
-    elif odpowiedz == "T" or odpowiedz == "t":
-        global wyjscie
-        wyjscie = True
+def return_to_menu():
+    choice = input('Wyjście z programu [T/N]? ')
+    if choice == "N" or choice == "n":
+        main_menu()
+    elif choice == "T" or choice == "t":
+        exit()
     else:
         print("Błędny wybór")
-        powrot_do_menu()
+        return_to_menu()
 
 
-def dodanie_zadania():
+def new_task():
     print("Podaj nazwę nowego zadania: ")
-    nowe = zadania(input(), False)
-    lista.append(nowe)
-    odpowiedz = input("Chcesz dodać kolejne zadanie [T/N]? ")
-    if odpowiedz == "N" or odpowiedz == "n":
-        menu_glowne()
-    elif odpowiedz == "T" or odpowiedz == "t":
-        dodanie_zadania()
+    new = task(input(), False)
+    task_list.append(new)
+    choice = input("Chcesz dodać kolejne zadanie [T/N]? ")
+    if choice == "N" or choice == "n":
+        main_menu()
+    elif choice == "T" or choice == "t":
+        new_task()
     else:
         print("Błędny wybór")
-        powrot_do_menu()
+        return_to_menu()
 
 
-def zrobione_zadania():
+def complete_task():
     print("tu będą zadania zrobione pobrane z bazy danych")
-    powrot_do_menu()
+    return_to_menu()
 
 
-def zadania_do_zrobienia():
+def incomplete_task():
     print("tu będą zadania do zrobienia pobrane z bazy danych")
-    for test in lista:
-        print(test.tytul)
-    powrot_do_menu()
+    for index in task_list:
+        print(index.name)
+    return_to_menu()
 
 
 if __name__ == "__main__":
-    while not wyjscie:
-        menu_glowne()
+    create_connection(r"C:\Users\mateusz.saganowski\PycharmProjects\pythonProject\pythonsqlite.db")
+    while True:
+        main_menu()
