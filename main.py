@@ -156,7 +156,7 @@ def return_to_menu():
 
 def new_task():
     print("Podaj nazwę nowego zadania: ")
-    new = task(input(), True)
+    new = task(input(), False)
     main_db_upload(new)
     choice = input("Chcesz dodać kolejne zadanie [T/N]? ")
     if choice == "N" or choice == "n":
