@@ -51,7 +51,7 @@ def create_task(conn, task):
     return cur.lastrowid
 
 
-def main():
+def main_db_upload(upload):
     # create a database connection
     conn = create_connection(database)
 
@@ -68,11 +68,30 @@ def main():
     else:
         print("Error! cannot create the database connection.")
     with conn:
-        # tasks
-        task_1 = ('Zrobić zakupy', True)
         # create tasks
-        create_task(conn, task_1)
-        select_all_tasks(conn)
+        new_task = (upload.name, upload.status)
+        create_task(conn, new_task)
+
+
+def main_db_download(status):
+    # create a database connection
+    conn = create_connection(database)
+
+    sql_create_tasks_table = """CREATE TABLE IF NOT EXISTS tasks (
+                                        id integer PRIMARY KEY,
+                                        name text NOT NULL,
+                                        status bool NOT NULL
+                                    );"""
+    # create tables
+    if conn is not None:
+
+        # create tasks table
+        create_table(conn, sql_create_tasks_table)
+    else:
+        print("Error! cannot create the database connection.")
+    with conn:
+        # create tasks
+        select_task_by_status(conn, status)
 
 
 def select_all_tasks(conn):
@@ -83,6 +102,22 @@ def select_all_tasks(conn):
     """
     cur = conn.cursor()
     cur.execute("SELECT * FROM tasks")
+
+    rows = cur.fetchall()
+
+    for row in rows:
+        print(row)
+
+
+def select_task_by_status(conn, status):
+    """
+    Query tasks by status
+    :param conn: the Connection object
+    :param status:
+    :return:
+    """
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM tasks WHERE status=?", (status,))
 
     rows = cur.fetchall()
 
@@ -121,11 +156,10 @@ def return_to_menu():
 
 def new_task():
     print("Podaj nazwę nowego zadania: ")
-    new = task(input(), False)
-    task_list.append(new)
+    new = task(input(), True)
+    main_db_upload(new)
     choice = input("Chcesz dodać kolejne zadanie [T/N]? ")
     if choice == "N" or choice == "n":
-        main()
         main_menu()
     elif choice == "T" or choice == "t":
         new_task()
@@ -135,18 +169,17 @@ def new_task():
 
 
 def complete_task():
-    print("tu będą zadania zrobione pobrane z bazy danych")
+    print("Zrobione zadania pobrane z bazy danych")
+    main_db_download(True)
     return_to_menu()
 
 
 def incomplete_task():
-    print("tu będą zadania do zrobienia pobrane z bazy danych")
-    for index in task_list:
-        print(index.name)
+    print("Pobrane zadania do zrobienia z bazy danych")
+    main_db_download(False)
     return_to_menu()
 
 
 if __name__ == "__main__":
-#    main()
     while True:
         main_menu()
