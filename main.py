@@ -90,7 +90,7 @@ def main_db_download(status):
     else:
         print("Error! cannot create the database connection.")
     with conn:
-        # create tasks
+        # select tasks
         select_task_by_status(conn, status)
 
 
