@@ -1,9 +1,8 @@
 import sqlite3
-from sqlite3 import Error
-from task import task
+from task import Task
 
 task_list = []
-database = r"C:\Users\mateusz.saganowski\PycharmProjects\pythonProject\pythonsqlite.db"
+database = "pythonsqlite.db"
 
 
 def create_connection(db_file):
@@ -16,7 +15,7 @@ def create_connection(db_file):
     try:
         conn = sqlite3.connect(db_file)
         return conn
-    except Error as e:
+    except sqlite3.Error as e:
         print(e)
 
     return conn
@@ -31,22 +30,22 @@ def create_table(conn, create_table_sql):
     try:
         c = conn.cursor()
         c.execute(create_table_sql)
-    except Error as e:
+    except sqlite3.Error as e:
         print(e)
 
 
-def create_task(conn, task):
+def create_task(conn, task_name):
     """
     Create a new task
     :param conn:
-    :param task:
+    :param task_name:
     :return:
     """
 
-    sql = ''' INSERT INTO tasks(name,status)
-              VALUES(?,?) '''
+    sql = """ INSERT INTO tasks(name,status)
+              VALUES(?,?) """
     cur = conn.cursor()
-    cur.execute(sql, task)
+    cur.execute(sql, task_name)
     conn.commit()
     return cur.lastrowid
 
@@ -69,8 +68,8 @@ def main_db_upload(upload):
         print("Error! cannot create the database connection.")
     with conn:
         # create tasks
-        new_task = (upload.name, upload.status)
-        create_task(conn, new_task)
+        create_new_task = (upload.name, upload.status)
+        create_task(conn, create_new_task)
 
 
 def main_db_download(status):
@@ -144,10 +143,10 @@ def main_menu():
 
 
 def return_to_menu():
-    choice = input('Wyjście z programu [T/N]? ')
-    if choice == "N" or choice == "n":
+    choice = input('Wyjście z programu [T/n]? ')
+    if choice.lower() == "n":
         main_menu()
-    elif choice == "T" or choice == "t":
+    elif choice.lower() == "t" or len(choice) == 0:
         exit()
     else:
         print("Błędny wybór")
@@ -156,12 +155,12 @@ def return_to_menu():
 
 def new_task():
     print("Podaj nazwę nowego zadania: ")
-    new = task(input(), False)
+    new = Task(input(), False)
     main_db_upload(new)
-    choice = input("Chcesz dodać kolejne zadanie [T/N]? ")
-    if choice == "N" or choice == "n":
+    choice = input("Chcesz dodać kolejne zadanie [T/n]? ")
+    if choice.lower() == "n":
         main_menu()
-    elif choice == "T" or choice == "t":
+    elif choice.lower() == "t" or len(choice) == 0:
         new_task()
     else:
         print("Błędny wybór")
