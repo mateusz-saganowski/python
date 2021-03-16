@@ -113,18 +113,22 @@ def return_to_menu():
 def new_task():
     print("Podaj nazwę nowego zadania: ")
     new = Task(input(), False)
-    conn = create_connection(database)
-    with conn:
-        create_new_task = (new.name, new.status)
-        create_task(conn, create_new_task)
-    choice = input("Chcesz dodać kolejne zadanie [T/n]? ")
-    if choice.lower() == "n":
-        main_menu()
-    elif choice.lower() == "t" or len(choice) == 0:
+    if len(new.name) == 0:
+        print("Nie podano poprawnej nazwy zadania!")
         new_task()
     else:
-        print("Błędny wybór")
-        return_to_menu()
+        conn = create_connection(database)
+        with conn:
+            create_new_task = (new.name, new.status)
+            create_task(conn, create_new_task)
+        choice = input("Chcesz dodać kolejne zadanie [T/n]? ")
+        if choice.lower() == "n":
+            main_menu()
+        elif choice.lower() == "t" or len(choice) == 0:
+            new_task()
+        else:
+            print("Błędny wybór")
+            return_to_menu()
 
 
 def complete_task():
