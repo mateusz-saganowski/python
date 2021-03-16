@@ -21,17 +21,29 @@ def create_connection(db_file):
     return conn
 
 
-def create_table(conn, create_table_sql):
-    """ create a table from the create_table_sql statement
-    :param conn: Connection object
-    :param create_table_sql: a CREATE TABLE statement
-    :return:
-    """
-    try:
-        c = conn.cursor()
-        c.execute(create_table_sql)
-    except sqlite3.Error as e:
-        print(e)
+def create_table():
+    # create a database connection
+    conn = create_connection(database)
+    sql_create_tasks_table = """CREATE TABLE IF NOT EXISTS tasks (
+                                                id integer PRIMARY KEY,
+                                                name text NOT NULL,
+                                                status bool NOT NULL
+                                            );"""
+    # create tables
+    if conn is not None:
+        # create tasks table
+        """ create a table from the create_table_sql statement
+            :param conn: Connection object
+            :param create_table_sql: a CREATE TABLE statement
+            :return:
+            """
+        try:
+            c = conn.cursor()
+            c.execute(sql_create_tasks_table)
+        except sqlite3.Error as e:
+            print(e)
+    else:
+        print("Error! cannot create the database connection.")
 
 
 def create_task(conn, task_name):
@@ -148,5 +160,6 @@ def incomplete_task():
 
 
 if __name__ == "__main__":
+    create_table()
     while True:
         main_menu()
