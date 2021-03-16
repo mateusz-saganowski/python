@@ -21,9 +21,7 @@ def create_connection(db_file):
     return conn
 
 
-def create_table():
-    # create a database connection
-    conn = create_connection(database)
+def create_task_table(conn):
     sql_create_tasks_table = """CREATE TABLE IF NOT EXISTS tasks (
                                                 id integer PRIMARY KEY,
                                                 name text NOT NULL,
@@ -44,6 +42,11 @@ def create_table():
             print(e)
     else:
         print("Error! cannot create the database connection.")
+
+
+def prepare_db():
+    conn = create_connection(database)
+    create_task_table(conn)
 
 
 def create_task(conn, task_name):
@@ -160,6 +163,6 @@ def incomplete_task():
 
 
 if __name__ == "__main__":
-    create_table()
+    prepare_db()
     while True:
         main_menu()
