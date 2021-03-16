@@ -50,49 +50,6 @@ def create_task(conn, task_name):
     return cur.lastrowid
 
 
-def main_db_upload(upload):
-    # create a database connection
-    conn = create_connection(database)
-
-    sql_create_tasks_table = """CREATE TABLE IF NOT EXISTS tasks (
-                                        id integer PRIMARY KEY,
-                                        name text NOT NULL,
-                                        status bool NOT NULL
-                                    );"""
-    # create tables
-    if conn is not None:
-
-        # create tasks table
-        create_table(conn, sql_create_tasks_table)
-    else:
-        print("Error! cannot create the database connection.")
-    with conn:
-        # create tasks
-        create_new_task = (upload.name, upload.status)
-        create_task(conn, create_new_task)
-
-
-def main_db_download(status):
-    # create a database connection
-    conn = create_connection(database)
-
-    sql_create_tasks_table = """CREATE TABLE IF NOT EXISTS tasks (
-                                        id integer PRIMARY KEY,
-                                        name text NOT NULL,
-                                        status bool NOT NULL
-                                    );"""
-    # create tables
-    if conn is not None:
-
-        # create tasks table
-        create_table(conn, sql_create_tasks_table)
-    else:
-        print("Error! cannot create the database connection.")
-    with conn:
-        # select tasks
-        select_task_by_status(conn, status)
-
-
 def select_all_tasks(conn):
     """
     Query all rows in the tasks table
@@ -156,7 +113,10 @@ def return_to_menu():
 def new_task():
     print("Podaj nazwę nowego zadania: ")
     new = Task(input(), False)
-    main_db_upload(new)
+    conn = create_connection(database)
+    with conn:
+        create_new_task = (new.name, new.status)
+        create_task(conn, create_new_task)
     choice = input("Chcesz dodać kolejne zadanie [T/n]? ")
     if choice.lower() == "n":
         main_menu()
@@ -168,14 +128,18 @@ def new_task():
 
 
 def complete_task():
-    print("Zrobione zadania pobrane z bazy danych")
-    main_db_download(True)
+    conn = create_connection(database)
+    with conn:
+        print("Zrobione zadania pobrane z bazy danych")
+        select_task_by_status(conn, True)
     return_to_menu()
 
 
 def incomplete_task():
-    print("Pobrane zadania do zrobienia z bazy danych")
-    main_db_download(False)
+    conn = create_connection(database)
+    with conn:
+        print("Pobrane zadania do zrobienia z bazy danych")
+        select_task_by_status(conn, False)
     return_to_menu()
 
 
