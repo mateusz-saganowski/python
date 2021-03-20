@@ -30,6 +30,11 @@ def create_task_table(conn):
     # create tables
     if conn is not None:
         # create tasks table
+        """ create a table from the create_table_sql statement
+            :param conn: Connection object
+            :param create_table_sql: a CREATE TABLE statement
+            :return:
+            """
         try:
             c = conn.cursor()
             c.execute(sql_create_tasks_table)
@@ -91,58 +96,10 @@ def select_task_by_status(conn, status):
         print(row)
 
 
-def select_task_by_id(conn, task_number):
-    """
-    Choose task by id
-    :param conn:
-    :param task_number:
-    :return:
-    """
-
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM tasks WHERE id=?", (task_number,))
-
-    row = cur.fetchall()
-    selected_task = row
-
-    return selected_task
-
-
-def update_task_status(conn, update_task):
-    """
-       update status
-       :param conn:
-       :param update_task:
-       :return:
-       """
-    sql = ''' UPDATE tasks
-                 SET status = ? 
-                 WHERE id = ?'''
-    cur = conn.cursor()
-    cur.execute(sql, update_task)
-    conn.commit()
-
-
-def update_task_name(conn, update_task):
-    """
-       update name
-       :param conn:
-       :param update_task:
-       :return:
-       """
-    sql = ''' UPDATE tasks
-                 SET name = ? 
-                 WHERE id = ?'''
-    cur = conn.cursor()
-    cur.execute(sql, update_task)
-    conn.commit()
-
-
 def main_menu():
     print("1: Wyświetlenie listy zrobionych zadań")
     print("2: Wyświetlenie listy zadań do wykonania")
     print("3: Dodaj zadanie")
-    print("4: Edycja zadania")
     print("0: Wyjście")
     choice = input('Wybierz menu: ')
     if choice == "1":
@@ -151,8 +108,6 @@ def main_menu():
         incomplete_task()
     elif choice == "3":
         new_task()
-    elif choice == "4":
-        task_edition()
     elif choice == "0":
         exit()
     else:
@@ -160,10 +115,10 @@ def main_menu():
 
 
 def return_to_menu():
-    choice = input('Wyjście z programu [t/N]? ')
-    if choice.lower() == "n" or len(choice) == 0:
+    choice = input('Wyjście z programu [T/n]? ')
+    if choice.lower() == "n":
         main_menu()
-    elif choice.lower() == "t":
+    elif choice.lower() == "t" or len(choice) == 0:
         exit()
     else:
         print("Błędny wybór")
@@ -172,7 +127,7 @@ def return_to_menu():
 
 def new_task():
     print("Podaj nazwę nowego zadania: ")
-    new = Task(input(), True)
+    new = Task(input(), False)
     if len(new.name) == 0:
         print("Nie podano poprawnej nazwy zadania!")
         new_task()
@@ -189,41 +144,6 @@ def new_task():
         else:
             print("Błędny wybór")
             return_to_menu()
-
-
-def task_edition():
-    task_number = int(input("Podaj numer ID zadania do edycji: "))
-    choice = input("Edycja Statusu czy nazwy zadania [S/n]? ")
-    if choice.lower() == "s" or len(choice) == 0:
-        conn = create_connection(database)
-        with conn:
-            sel_row = select_task_by_id(conn, task_number)
-            sel_task = sel_row[0]
-            sel_task_status = bool(sel_task[2])
-            if sel_task_status is False:
-                choice = input("Potwierdzasz zmianę statusu zadania na TRUE (T)? ")
-                if choice.lower() == "t" or len(choice) == 0:
-                    update_task_status(conn, (True, task_number))
-                else:
-                    main_menu()
-            elif sel_task_status is True:
-                choice = input("Potwierdzasz zmianę statusu zadania na False (T)? ")
-                if choice.lower() == "t" or len(choice) == 0:
-                    update_task_status(conn, (False, task_number))
-                else:
-                    main_menu()
-
-    elif choice.lower() == "n":
-        conn = create_connection(database)
-        with conn:
-            sel_row = select_task_by_id(conn, task_number)
-            sel_task = sel_row[0]
-            print(sel_task[1])
-            update_name = input("Podaj poprawną nazwę edytowanego zadania: ")
-            update_task_name(conn, (update_name, task_number))
-    else:
-        print("Błędny wybór")
-        return_to_menu()
 
 
 def complete_task():
