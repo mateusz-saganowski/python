@@ -6,10 +6,10 @@ database = "pythonsqlite.db"
 
 
 def create_connection(db_file):
-    """ create a database connection to the SQLite database
-        specified by db_file
-    :param db_file: database file
-    :return: Connection object or None
+    """
+        create a database connection to the SQLite database
+        :param db_file:  name and location for database
+        :return:
     """
     conn = None
     try:
@@ -22,6 +22,11 @@ def create_connection(db_file):
 
 
 def create_task_table(conn):
+    """
+        Create a tasks table
+        :param conn:  Connection to the SQLite database
+        :return:
+    """
     sql_create_tasks_table = """CREATE TABLE IF NOT EXISTS tasks (
                                                 id integer PRIMARY KEY,
                                                 name text NOT NULL,
@@ -30,11 +35,6 @@ def create_task_table(conn):
     # create tables
     if conn is not None:
         # create tasks table
-        """ create a table from the create_table_sql statement
-            :param conn: Connection object
-            :param create_table_sql: a CREATE TABLE statement
-            :return:
-            """
         try:
             c = conn.cursor()
             c.execute(sql_create_tasks_table)
@@ -51,10 +51,10 @@ def prepare_db():
 
 def create_task(conn, task_name):
     """
-    Create a new task
-    :param conn:
-    :param task_name:
-    :return:
+        Create a new task
+        :param conn:  Connection to the SQLite database
+        :param task_name: Class for created task: name and status for the table in database
+        :return:
     """
 
     sql = """ INSERT INTO tasks(name,status)
@@ -67,9 +67,9 @@ def create_task(conn, task_name):
 
 def select_all_tasks(conn):
     """
-    Query all rows in the tasks table
-    :param conn: the Connection object
-    :return:
+        Query all rows in the tasks table
+        :param conn:  Connection to the SQLite database
+        :return:
     """
     cur = conn.cursor()
     cur.execute("SELECT * FROM tasks")
@@ -82,10 +82,10 @@ def select_all_tasks(conn):
 
 def select_task_by_status(conn, status):
     """
-    Query tasks by status
-    :param conn: the Connection object
-    :param status:
-    :return:
+        Query tasks by status
+       :param conn:  Connection to the SQLite database
+       :param status: selected status for query tasks
+       :return:
     """
     cur = conn.cursor()
     cur.execute("SELECT * FROM tasks WHERE status=?", (status,))
@@ -96,10 +96,71 @@ def select_task_by_status(conn, status):
         print(row)
 
 
+def select_task_by_id(conn, task_number):
+    """
+       Selected task by id from database
+       :param conn:  Connection to the SQLite database
+       :param task_number: id of the selected task
+       :return:
+    """
+
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM tasks WHERE id=?", (task_number,))
+
+    row = cur.fetchall()
+    selected_task = row
+
+    return selected_task
+
+
+def update_task_status(conn, update_task):
+    """
+       Update status of selected task in database
+       :param conn:  Connection to the SQLite database
+       :param update_task: id of the updated task
+       :return:
+    """
+    sql = ''' UPDATE tasks
+                 SET status = ? 
+                 WHERE id = ?'''
+    cur = conn.cursor()
+    cur.execute(sql, update_task)
+    conn.commit()
+
+
+def update_task_name(conn, update_task):
+    """
+       Update name of selected task in database
+       :param conn:  Connection to the SQLite database
+       :param update_task: id of the updated task
+       :return:
+    """
+    sql = ''' UPDATE tasks
+                 SET name = ? 
+                 WHERE id = ?'''
+    cur = conn.cursor()
+    cur.execute(sql, update_task)
+    conn.commit()
+
+
+def delete_task(conn, update_task):
+    """
+        Delete a task by task id in database
+        :param conn:  Connection to the SQLite database
+        :param update_task: id of the deleted task
+        :return:
+    """
+    sql = 'DELETE FROM tasks WHERE id=?'
+    cur = conn.cursor()
+    cur.execute(sql, (update_task,))
+    conn.commit()
+
+
 def main_menu():
     print("1: Wyświetlenie listy zrobionych zadań")
     print("2: Wyświetlenie listy zadań do wykonania")
     print("3: Dodaj zadanie")
+    print("4: Edycja zadania")
     print("0: Wyjście")
     choice = input('Wybierz menu: ')
     if choice == "1":
@@ -108,6 +169,8 @@ def main_menu():
         incomplete_task()
     elif choice == "3":
         new_task()
+    elif choice == "4":
+        task_edition()
     elif choice == "0":
         exit()
     else:
@@ -115,10 +178,10 @@ def main_menu():
 
 
 def return_to_menu():
-    choice = input('Wyjście z programu [T/n]? ')
-    if choice.lower() == "n":
+    choice = input('Wyjście z programu [t/N]? ')
+    if choice.lower() == "n" or len(choice) == 0:
         main_menu()
-    elif choice.lower() == "t" or len(choice) == 0:
+    elif choice.lower() == "t":
         exit()
     else:
         print("Błędny wybór")
@@ -127,7 +190,7 @@ def return_to_menu():
 
 def new_task():
     print("Podaj nazwę nowego zadania: ")
-    new = Task(input(), False)
+    new = Task(input(), True)
     if len(new.name) == 0:
         print("Nie podano poprawnej nazwy zadania!")
         new_task()
@@ -144,6 +207,46 @@ def new_task():
         else:
             print("Błędny wybór")
             return_to_menu()
+
+
+def task_edition():
+    task_number = int(input("Podaj numer ID zadania do edycji: "))
+    choice = input("Edycja Statusu, nazwy czy usunięcie zadania [S/n/u]? ")
+    if choice.lower() == "s" or len(choice) == 0:
+        conn = create_connection(database)
+        with conn:
+            sel_row = select_task_by_id(conn, task_number)
+            sel_task = sel_row[0]
+            sel_task_status = bool(sel_task[2])
+            if sel_task_status is False:
+                choice = input("Potwierdzasz zmianę statusu zadania na TRUE (T)? ")
+                if choice.lower() == "t" or len(choice) == 0:
+                    update_task_status(conn, (True, task_number))
+                else:
+                    main_menu()
+            elif sel_task_status is True:
+                choice = input("Potwierdzasz zmianę statusu zadania na False (T)? ")
+                if choice.lower() == "t" or len(choice) == 0:
+                    update_task_status(conn, (False, task_number))
+                else:
+                    main_menu()
+
+    elif choice.lower() == "n":
+        conn = create_connection(database)
+        with conn:
+            sel_row = select_task_by_id(conn, task_number)
+            sel_task = sel_row[0]
+            print(sel_task[1])
+            update_name = input("Podaj poprawną nazwę edytowanego zadania: ")
+            update_task_name(conn, (update_name, task_number))
+    elif choice.lower() == "u":
+        conn = create_connection(database)
+        with conn:
+            delete_task(conn, task_number)
+
+    else:
+        print("Błędny wybór")
+        return_to_menu()
 
 
 def complete_task():
