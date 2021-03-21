@@ -19,7 +19,7 @@ def create_connection(db_file):
 
 def create_task_table(conn):
     """
-        Create a tasks table
+        Create a tasks table in SQLite database
         :param conn:  Connection to the SQLite database
         :return:
     """
@@ -51,10 +51,10 @@ def prepare_db(conn):
 
 def create_task(conn, task_name):
     """
-        Create a new task
+        Create a new task(row) for table in database
         :param conn:  Connection to the SQLite database
-        :param task_name: Class for created task: name and status for the table in database
-        :return:
+        :param task_name: Class for created task: name and status for the new row in database table
+        :return: number of last row in database table
     """
 
     sql = """ INSERT INTO tasks(name,status)
@@ -82,7 +82,7 @@ def select_all_tasks(conn):
 
 def select_task_by_status(conn, status):
     """
-        Query tasks by status
+        Query tasks by status in the task table
        :param conn:  Connection to the SQLite database
        :param status: selected status for query tasks
        :return:
@@ -98,24 +98,25 @@ def select_task_by_status(conn, status):
 
 def select_task_by_id(conn, task_number):
     """
-       Selected task by id from database
+       Selected task by id from database table
        :param conn:  Connection to the SQLite database
        :param task_number: id of the selected task
-       :return:
+       :return: all row selected in database table (id, name, status)
     """
 
     cur = conn.cursor()
     cur.execute("SELECT * FROM tasks WHERE id=?", (task_number,))
 
     row = cur.fetchall()
-    selected_task = row[0]
 
-    return selected_task
+    if len(row) != 0:
+        selected_task = row[0]
+        return selected_task
 
 
 def update_task_status(conn, update_task):
     """
-       Update status of selected task in database
+       Update status of selected task in database table
        :param conn:  Connection to the SQLite database
        :param update_task: id of the updated task
        :return:
@@ -130,7 +131,7 @@ def update_task_status(conn, update_task):
 
 def update_task_name(conn, update_task):
     """
-       Update name of selected task in database
+       Update name of selected task in database table
        :param conn:  Connection to the SQLite database
        :param update_task: id of the updated task
        :return:
@@ -145,7 +146,7 @@ def update_task_name(conn, update_task):
 
 def delete_task(conn, update_task):
     """
-        Delete a task by task id in database
+        Delete a task by task id in database table
         :param conn:  Connection to the SQLite database
         :param update_task: id of the deleted task
         :return:

@@ -59,36 +59,45 @@ def new_task():
 
 
 def task_edition():
-    task_number = int(input("Podaj numer ID zadania do edycji: "))
-    choice = input("Edycja Statusu, nazwy czy usunięcie zadania [S/n/u]? ")
-    if choice.lower() == "s" or len(choice) == 0:
+    task_number = input("Podaj numer ID zadania do edycji: ")
+    if task_number.isdecimal() is False:
+        print("Błędny wpis numeru zadania!")
+        task_edition()
+    elif task_number.isdecimal() is True:
+        task_number = int(task_number)
         with conn:
             sel_task = select_task_by_id(conn, task_number)
-            sel_task_status = bool(sel_task[2])
-            if sel_task_status is False:
-                choice = input("Potwierdzasz zmianę statusu zadania na TRUE (T)? ")
-                if choice.lower() == "t" or len(choice) == 0:
-                    update_task_status(conn, (True, task_number))
+            if sel_task is not None:
+                choice = input("Edycja Statusu, nazwy czy usunięcie zadania [S/n/u]? ")
+                if choice.lower() == "s" or len(choice) == 0:
+                    sel_task_status = bool(sel_task[2])
+                    if sel_task_status is False:
+                        choice = input("Potwierdzasz zmianę statusu zadania na TRUE (T)? ")
+                        if choice.lower() == "t" or len(choice) == 0:
+                            update_task_status(conn, (True, task_number))
+                        else:
+                            main_menu()
+                    elif sel_task_status is True:
+                        choice = input("Potwierdzasz zmianę statusu zadania na False (T)? ")
+                        if choice.lower() == "t" or len(choice) == 0:
+                            update_task_status(conn, (False, task_number))
+                        else:
+                            main_menu()
+                elif choice.lower() == "n":
+                    print(sel_task[1])
+                    update_name = input("Podaj poprawną nazwę edytowanego zadania: ")
+                    update_task_name(conn, (update_name, task_number))
+                    print("Nazwę zadania pomyślnie zmieniono w bazie danych")
+                elif choice.lower() == "u":
+                    delete_task(conn, task_number)
+                    print("Zadanie pomyślnie usunięto z bazy danych")
                 else:
-                    main_menu()
-            elif sel_task_status is True:
-                choice = input("Potwierdzasz zmianę statusu zadania na False (T)? ")
-                if choice.lower() == "t" or len(choice) == 0:
-                    update_task_status(conn, (False, task_number))
-                else:
-                    main_menu()
-    elif choice.lower() == "n":
-        with conn:
-            sel_task = select_task_by_id(conn, task_number)
-            print(sel_task[1])
-            update_name = input("Podaj poprawną nazwę edytowanego zadania: ")
-            update_task_name(conn, (update_name, task_number))
-    elif choice.lower() == "u":
-        with conn:
-            delete_task(conn, task_number)
-    else:
-        print("Błędny wybór")
-        return_to_menu()
+                    print("Błędny wybór")
+                    return_to_menu()
+            else:
+                print("Brak wybranego numeru zadania w tabeli bazy danych")
+                select_all_tasks(conn)
+                task_edition()
 
 
 def complete_task():
