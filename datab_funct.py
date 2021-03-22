@@ -96,16 +96,16 @@ def select_task_by_status(conn, status):
         print(row)
 
 
-def select_task_by_id(conn, task_number):
+def select_task_by_id(conn, task_id):
     """
        Selected task by id from database table
        :param conn:  Connection to the SQLite database
-       :param task_number: id of the selected task
+       :param task_id: id of the selected task
        :return: all row selected in database table (id, name, status)
     """
 
     cur = conn.cursor()
-    cur.execute("SELECT * FROM tasks WHERE id=?", (task_number,))
+    cur.execute("SELECT * FROM tasks WHERE id=?", (task_id,))
 
     row = cur.fetchall()
 
@@ -118,12 +118,12 @@ def update_task_status(conn, update_task):
     """
        Update status of selected task in database table
        :param conn:  Connection to the SQLite database
-       :param update_task: id of the updated task
+       :param update_task: updating task - updated status and task ID
        :return:
     """
-    sql = ''' UPDATE tasks
+    sql = """ UPDATE tasks
                  SET status = ? 
-                 WHERE id = ?'''
+                 WHERE id = ?"""
     cur = conn.cursor()
     cur.execute(sql, update_task)
     conn.commit()
@@ -133,25 +133,25 @@ def update_task_name(conn, update_task):
     """
        Update name of selected task in database table
        :param conn:  Connection to the SQLite database
-       :param update_task: id of the updated task
+       :param update_task: updating task - updated name and task ID
        :return:
     """
-    sql = ''' UPDATE tasks
+    sql = """ UPDATE tasks
                  SET name = ? 
-                 WHERE id = ?'''
+                 WHERE id = ?"""
     cur = conn.cursor()
     cur.execute(sql, update_task)
     conn.commit()
 
 
-def delete_task(conn, update_task):
+def delete_task(conn, task_id):
     """
         Delete a task by task id in database table
         :param conn:  Connection to the SQLite database
-        :param update_task: id of the deleted task
+        :param task_id: id of the deleted task
         :return:
     """
-    sql = 'DELETE FROM tasks WHERE id=?'
+    sql = "DELETE FROM tasks WHERE id=?"
     cur = conn.cursor()
-    cur.execute(sql, (update_task,))
+    cur.execute(sql, (task_id,))
     conn.commit()
