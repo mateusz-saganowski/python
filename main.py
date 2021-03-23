@@ -38,58 +38,57 @@ def return_to_menu():
 
 
 def new_task():
-    print("Podaj nazwę nowego zadania: ")
-    new = Task(input(), False)
-    if len(new.name) == 0:
+    while True:
+        task_name = input("Podaj nazwę nowego zadania: ")
+        if len(task_name) > 0:
+            break
         print("Nie podano poprawnej nazwy zadania!")
+
+    new = Task(task_name, False)
+    with conn:
+        create_new_task = (new.name, new.status)
+        datab_funct.create_task(conn, create_new_task)
+    choice = input("Chcesz dodać kolejne zadanie [T/n]? ")
+    if choice.lower() == "n":
+        main_menu()
+    elif choice.lower() == "t" or len(choice) == 0:
         new_task()
     else:
-        with conn:
-            create_new_task = (new.name, new.status)
-            datab_funct.create_task(conn, create_new_task)
-        choice = input("Chcesz dodać kolejne zadanie [T/n]? ")
-        if choice.lower() == "n":
-            main_menu()
-        elif choice.lower() == "t" or len(choice) == 0:
-            new_task()
-        else:
-            print("Błędny wybór")
-            return_to_menu()
+        print("Błędny wybór")
+        return_to_menu()
 
 
 def task_edition():
-    task_id = input("Podaj numer ID zadania do edycji: ")
-    if task_id.isdecimal():
-        task_id = int(task_id)
-        with conn:
-            sel_task = datab_funct.select_task_by_id(conn, task_id)
-            if sel_task is not None:
-                choice = input("Edycja Statusu, nazwy czy usunięcie zadania [S/n/u]? ")
-                if choice.lower() == "s" or len(choice) == 0:
-                    sel_task_status = bool(sel_task[2])
-                    choice = input(f"Potwierdzasz zmianę statusu zadania na {not sel_task_status} (T)? ")
-                    if choice.lower() == "t" or len(choice) == 0:
-                        datab_funct.update_task_status(conn, (not sel_task_status, task_id))
-                    else:
-                        main_menu()
-                elif choice.lower() == "n":
-                    print(sel_task[1])
-                    update_name = input("Podaj poprawną nazwę edytowanego zadania: ")
-                    datab_funct.update_task_name(conn, (update_name, task_id))
-                    print("Nazwę zadania pomyślnie zmieniono w bazie danych")
-                elif choice.lower() == "u":
-                    datab_funct.delete_task(conn, task_id)
-                    print("Zadanie pomyślnie usunięto z bazy danych")
-                else:
-                    print("Błędny wybór")
-                    return_to_menu()
+    while True:
+        task_id = input("Podaj numer ID zadania do edycji: ")
+        if task_id.isdecimal():
+            task_id = int(task_id)
+            with conn:
+                sel_task = datab_funct.select_task_by_id(conn, task_id)
+                if sel_task is not None:
+                    break
+        print("Błędny wpis lub brak wybranego numeru zadania z tabeli bazy danych!")
+        datab_funct.select_all_tasks(conn)
+    with conn:
+        choice = input("Edycja Statusu, nazwy czy usunięcie zadania [S/n/u]? ")
+        if choice.lower() == "s" or len(choice) == 0:
+            sel_task_status = bool(sel_task[2])
+            choice = input(f"Potwierdzasz zmianę statusu zadania na {not sel_task_status} (T)? ")
+            if choice.lower() == "t" or len(choice) == 0:
+                datab_funct.update_task_status(conn, (not sel_task_status, task_id))
             else:
-                print("Brak wybranego numeru zadania w tabeli bazy danych")
-                datab_funct.select_all_tasks(conn)
-                task_edition()
-    else:
-        print("Błędny wpis numeru zadania!")
-        task_edition()
+                main_menu()
+        elif choice.lower() == "n":
+            print(sel_task[1])
+            update_name = input("Podaj poprawną nazwę edytowanego zadania: ")
+            datab_funct.update_task_name(conn, (update_name, task_id))
+            print("Nazwę zadania pomyślnie zmieniono w bazie danych")
+        elif choice.lower() == "u":
+            datab_funct.delete_task(conn, task_id)
+            print("Zadanie pomyślnie usunięto z bazy danych")
+        else:
+            print("Błędny wybór")
+            return_to_menu()
 
 
 def complete_task():
